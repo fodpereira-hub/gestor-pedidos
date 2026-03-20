@@ -3,104 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaskMaster Cloud V26</title>
+    <title>TaskMaster Pro V44</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #0073ea; --bg: #f5f6f8; --text: #323338; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; color: var(--text); overflow: hidden; }
-        .sidebar { width: 260px; background: #2b3e50; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar h2 { font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #4a5a6a; padding-bottom: 10px; }
-        .nav-container { flex: 1; overflow-y: auto; }
-        .nav-item { padding: 10px; cursor: pointer; border-radius: 6px; margin-bottom: 8px; background: rgba(255,255,255,0.05); font-size: 13px; }
-        .nav-item.active { background: var(--primary); font-weight: bold; }
-        .main { flex: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .dashboard { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .mini-stat { background: white; padding: 10px 18px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; white-space: nowrap; font-size: 13px; }
-        .input-bar { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e9ecef; margin-bottom: 20px; }
-        .input-bar input { padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        .btn-add { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        :root { --primary: #0073ea; --bg: #f5f6f8; --text: #323338; --card: #ffffff; --border: #e9ecef; }
+        [data-theme="dark"] { --bg: #18191c; --text: #e1e1e1; --card: #25272b; --border: #333539; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); transition: 0.2s; display: flex; height: 100vh; overflow: hidden; }
         
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; font-size: 11px; color: #666; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #f1f1f1; font-size: 14px; cursor: context-menu; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .mobile-label { display: none; }
+        .sidebar { width: 260px; background: #2b3e50; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .nav-container { flex: 1; overflow-y: auto; }
+        .nav-item { padding: 10px; cursor: pointer; border-radius: 6px; margin-bottom: 5px; background: rgba(255,255,255,0.05); font-size: 13px; transition: 0.2s; }
+        .nav-item.active { background: var(--primary); font-weight: bold; }
+
+        .main { flex: 1; padding: 25px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .dashboard { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .mini-stat { background: var(--card); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+        .filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
+        .filter-btn { background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: 0.2s; }
+        .filter-btn:hover { background: rgba(0, 115, 234, 0.05); }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
+
+        .input-bar { display: flex; flex-wrap: wrap; gap: 10px; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 25px; }
+        .input-bar input { padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); flex: 1; min-width: 140px; }
+
+        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; table-layout: fixed; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        th { text-align: left; padding: 15px; background: rgba(0,0,0,0.02); font-size: 11px; text-transform: uppercase; color: #888; }
+        td { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .editable:hover { background: rgba(0, 115, 234, 0.1); cursor: pointer; border-radius: 4px; }
+        .edit-input { width: 100%; border: 1px solid var(--primary); padding: 5px; border-radius: 4px; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 14px; }
+        
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1.5px solid; text-transform: uppercase; cursor: pointer; display: inline-block; }
+        .atrasado { background-color: rgba(226, 68, 92, 0.08) !important; }
+        .linha-urgente { background-color: rgba(253, 171, 61, 0.05); border-left-width: 8px !important; }
+
+        /* Botões de Ação com mais margem/espaço */
+        .btn-acao { background: none; border: none; cursor: pointer; font-size: 18px; transition: 0.2s; padding: 8px; }
+        .btn-acao:hover { transform: scale(1.15); }
 
         @media (max-width: 799px) {
-            body { flex-direction: column; } .sidebar { width: 100%; height: auto; padding: 10px; }
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; padding: 10px; }
             .nav-container { display: flex; gap: 5px; overflow-x: auto; }
             thead { display: none; }
-            .task-row { display: flex; flex-direction: column; background: white; margin-bottom: 15px; border-radius: 12px; padding: 15px; border-left: 6px solid; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-            .task-row td { display: block; width: 100% !important; border: none; padding: 4px 0; white-space: normal; }
-            .mobile-label { display: inline-block; font-weight: bold; font-size: 10px; color: #999; text-transform: uppercase; margin-right: 8px; min-width: 80px; }
-            .actions-cell { display: flex !important; justify-content: flex-end; gap: 20px; border-top: 1px solid #eee !important; margin-top: 10px; padding-top: 10px !important; }
+            .task-row { display: flex; flex-direction: column; border-left: 6px solid; margin-bottom: 15px; padding: 12px; background: var(--card); }
+            td { border: none; padding: 4px 0; width: 100% !important; white-space: normal; display: flex; align-items: center; }
+            td::before { content: attr(data-label); font-weight: bold; font-size: 10px; color: #999; text-transform: uppercase; width: 100px; flex-shrink: 0; }
         }
 
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1.5px solid; text-transform: uppercase; }
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border-radius: 15px; z-index: 100; width: 85%; max-width: 450px; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; backdrop-filter: blur(4px); }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 25px; border-radius: 15px; z-index: 100; width: 85%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); overflow-y: auto; max-height: 90vh; }
     </style>
 </head>
 <body>
 
-    <datalist id="dl-resp"></datalist>
     <datalist id="dl-pend"></datalist>
 
     <div class="sidebar">
-        <h2>📂 Meus Planos</h2>
+        <h2 style="font-size:16px;">📂 Planos Cloud</h2>
         <div class="nav-container" id="lista-planos"></div>
-        <button onclick="novoPlano()" style="background:none; border:1px dashed white; color:white; padding:10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Novo Plano</button>
-        <button onclick="abrirSettings()" style="background:#4a5a6a; color:white; border:none; padding:12px; cursor:pointer; border-radius:4px; font-weight:bold; margin-top:20px;">⚙️ DEFINIÇÕES</button>
+        <button onclick="novoPlano()" style="background:none; border:1px dashed white; color:white; padding:10px; border-radius:4px; font-size:12px; cursor:pointer; margin-top:10px;">+ Novo Plano</button>
+        <button onclick="verLixeira()" style="background:#e2445c; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; margin-top:10px; cursor:pointer;">🗑️ LIXEIRA</button>
+        <button onclick="abrirSettings()" style="background:#4a5a6a; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; margin-top:10px; cursor:pointer;">⚙️ DEFINIÇÕES</button>
     </div>
 
     <div class="main">
-        <div class="dashboard" id="dashboard">
-            <div class="mini-stat">🔢 Total: <span id="stat-total" style="font-weight:bold">0</span></div>
-            <div class="mini-stat">⏳ Pend: <span id="stat-pend" style="font-weight:bold; color:#fdab3d">0</span></div>
-            <div class="mini-stat">🚨 Urgente: <span id="stat-prazo" style="font-weight:bold; color:#e2445c">0</span></div>
-            <div class="mini-stat">✅ OK: <span id="stat-ok" style="font-weight:bold; color:#00c875">0</span></div>
+        <h2 id="titulo-seccao" style="margin-top:0; font-size:18px; color:var(--primary); display:none;">🗑️ Lixeira</h2>
+
+        <div class="dashboard" id="dashboard-stats">
+            <div class="mini-stat">🔢 Total: <span id="stat-total">0</span></div>
+            <div class="mini-stat">⏳ Pend: <span id="stat-pend" style="color:#fdab3d">0</span></div>
+            <div class="mini-stat">🚨 Prazos: <span id="stat-prazo" style="color:#e2445c">0</span></div>
+            <div class="mini-stat">✅ OK: <span id="stat-ok" style="color:#00c875">0</span></div>
         </div>
 
-        <div class="input-bar">
-            <input type="text" id="in-titulo" placeholder="O que foi pedido?">
-            <div style="display:flex; gap:8px;">
-                <input type="text" id="in-resp" list="dl-resp" placeholder="Responsável" style="flex:1">
-                <input type="text" id="in-dep" list="dl-pend" placeholder="Pendente de" style="flex:1">
-            </div>
-            <div style="display:flex; gap:8px;">
-                <input type="date" id="in-prazo" style="flex:1">
-                <button class="btn-add" onclick="adicionarTarefa()" style="flex:1">ADICIONAR</button>
-            </div>
+        <div class="filters" id="filtros-container"></div>
+
+        <div class="input-bar" id="input-fields">
+            <input type="text" id="in-t" placeholder="Pedido...">
+            <input type="text" id="in-o" placeholder="Notas...">
+            <input type="text" id="in-d" list="dl-pend" placeholder="Pendente...">
+            <input type="date" id="in-p">
+            <button onclick="adicionarTarefa()" style="background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">ADD</button>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th style="width:30%">Pedido</th>
-                    <th style="width:15%">Responsável</th>
+                    <th style="width:23%">Pedido</th>
+                    <th style="width:23%">Notas</th>
                     <th style="width:15%">Pendente</th>
                     <th style="width:15%">Estado</th>
-                    <th style="width:15%">Prazo</th>
-                    <th style="width:10%">Ações</th>
+                    <th style="width:12%">Prazo</th>
+                    <th style="width:12%">Ações</th>
                 </tr>
             </thead>
             <tbody id="tabela-corpo"></tbody>
         </table>
     </div>
 
-    <div class="overlay" id="overlay" onclick="fecharModais()"></div>
-    <div class="modal" id="modal-settings">
-        <h3 style="margin:0">Definições</h3>
-        <label style="font-size:11px; font-weight:bold; display:block; margin-top:15px;">👤 Responsáveis (vírgulas):</label>
-        <textarea id="set-resp" style="width:100%; height:40px; border-radius:6px; border:1px solid #ccc;"></textarea>
-        <label style="font-size:11px; font-weight:bold; display:block; margin-top:10px;">🏢 Entidades:</label>
-        <textarea id="set-pend" style="width:100%; height:40px; border-radius:6px; border:1px solid #ccc;"></textarea>
-        <label style="font-size:11px; font-weight:bold; display:block; margin-top:10px;">🎨 Estados & Cores:</label>
+    <div id="overlay" onclick="fecharModais()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99;"></div>
+    <div id="modal-settings" class="modal">
+        <h3>Definições</h3>
+        
+        <label style="font-size:11px; font-weight:bold;">🏢 Opções para Pendente (separadas por vírgula):</label>
+        <textarea id="set-pend-list" style="width:100%; height:60px; margin-bottom:15px; border-radius:6px; background:var(--bg); color:var(--text); padding:8px; border:1px solid var(--border);"></textarea>
+
+        <label style="font-size:11px; font-weight:bold;">🎨 Estados & Cores:</label>
         <div id="set-estados-list"></div>
-        <button onclick="adicionarCampoEstado()" style="font-size:10px; cursor:pointer; margin:10px 0;">+ Novo Estado</button>
-        <label style="font-size:11px; font-weight:bold; display:block;">⏰ Dias de Alerta:</label>
-        <input type="number" id="set-dias" style="width:70px; padding:8px; border-radius:6px; border:1px solid #ccc;">
-        <button class="btn-add" onclick="salvarSettings()" style="width:100%; margin-top:20px">GUARDAR</button>
+        <button onclick="adicionarCampoEstado()" style="margin:10px 0; font-size:10px;">+ Adicionar Estado</button>
+        
+        <label style="font-size:11px; font-weight:bold; display:block; margin-top:10px;">🌙 Modo Visual:</label>
+        <select onchange="toggleDarkMode(this.value)" id="set-theme" style="width:100%; padding:8px; margin-bottom:15px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px;">
+            <option value="light">Claro</option>
+            <option value="dark">Escuro</option>
+        </select>
+        
+        <button onclick="salvarSettings()" style="width:100%; background:var(--primary); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;">GUARDAR E APLICAR</button>
     </div>
 
 <script>
@@ -112,121 +132,287 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let config = { estados: [], responsaveis: "", pendentesDe: "", diasAviso: 30 };
-    let dados = { planos: ["Devoluções"], planoAtivo: "Devoluções", tarefas: {} };
+    let config = { estados: [], theme: 'light', diasAviso: 30, pendList: "" };
+    let dados = { tarefas: {}, planos: ["Geral"], planoAtivo: "Geral" };
+    let filtroAtual = 'todos'; 
+    let modoLixeira = false;
 
-    db.ref('config').on('value', snap => { if(snap.val()) { config = snap.val(); atualizarDatalists(); render(); } });
-    db.ref('dados').on('value', snap => { if(snap.val()) { const v = snap.val(); dados.planos = v.planos || ["Devoluções"]; dados.planoAtivo = v.planoAtivo || "Devoluções"; dados.tarefas = v.tarefas || {}; } render(); });
+    db.ref('config').on('value', snap => {
+        if(snap.val()) {
+            let val = snap.val();
+            config.estados = val.estados || [];
+            config.theme = val.theme || 'light';
+            config.pendList = val.pendList || "";
+
+            document.body.setAttribute('data-theme', config.theme);
+            document.getElementById('dl-pend').innerHTML = config.pendList.split(',').map(i => `<option value="${i.trim()}">`).join('');
+            renderFiltros();
+            render();
+        }
+    });
+
+    db.ref('dados').on('value', snap => {
+        if(snap.val()){
+            dados.planos = snap.val().planos || ["Geral"];
+            dados.planoAtivo = snap.val().planoAtivo || "Geral";
+            dados.tarefas = snap.val().tarefas || {};
+            render();
+        }
+    });
+
+    function setFiltro(f) {
+        filtroAtual = f;
+        renderFiltros();
+        render();
+    }
+
+    function renderFiltros() {
+        if(!config.estados) return;
+        const fCont = document.getElementById('filtros-container');
+        fCont.innerHTML = `
+            <button class="filter-btn ${filtroAtual === 'todos' ? 'active' : ''}" onclick="setFiltro('todos')">Todos</button>
+            <button class="filter-btn ${filtroAtual === 'urgente' ? 'active' : ''}" onclick="setFiltro('urgente')">⭐ Urgentes</button>
+        `;
+        config.estados.forEach(e => {
+            fCont.innerHTML += `<button class="filter-btn ${filtroAtual === e.id ? 'active' : ''}" onclick="setFiltro('${e.id}')">${e.nome}</button>`;
+        });
+    }
+
+    function verLixeira() {
+        modoLixeira = true;
+        document.getElementById('input-fields').style.display = 'none';
+        document.getElementById('filtros-container').style.display = 'none';
+        document.getElementById('dashboard-stats').style.display = 'none';
+        document.getElementById('titulo-seccao').style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        render();
+    }
+
+    function mudarPlano(p) { 
+        modoLixeira = false;
+        document.getElementById('input-fields').style.display = 'flex';
+        document.getElementById('filtros-container').style.display = 'flex';
+        document.getElementById('dashboard-stats').style.display = 'flex';
+        document.getElementById('titulo-seccao').style.display = 'none';
+        
+        db.ref('dados').update({ planoAtivo: p }); 
+        filtroAtual = 'todos'; 
+        renderFiltros(); 
+    }
+
+    function apagarPlano(nomePlano) {
+        if(dados.planos.length <= 1) {
+            alert("Não podes apagar o último plano! Se quiseres, cria um novo primeiro.");
+            return;
+        }
+        if(confirm(`Queres mesmo apagar o plano "${nomePlano}"? As tarefas vão ser movidas para a Lixeira.`)) {
+            const novosPlanos = dados.planos.filter(p => p !== nomePlano);
+            const novoAtivo = dados.planoAtivo === nomePlano ? novosPlanos[0] : dados.planoAtivo;
+            
+            // Soft-delete nas tarefas deste plano
+            const updates = {};
+            Object.keys(dados.tarefas).forEach(id => {
+                if(dados.tarefas[id].plano === nomePlano) {
+                    updates[`dados/tarefas/${id}/eliminado`] = true;
+                }
+            });
+            updates['dados/planos'] = novosPlanos;
+            updates['dados/planoAtivo'] = novoAtivo;
+            
+            db.ref().update(updates);
+            
+            // Forçar redefinição do UI se o plano apagado for o ativo
+            if(dados.planoAtivo === nomePlano) {
+                mudarPlano(novoAtivo);
+            }
+        }
+    }
 
     function render() {
         if(!config.estados || !config.estados.length) return;
-        document.getElementById('lista-planos').innerHTML = dados.planos.map(p => `<div class="nav-item ${dados.planoAtivo===p?'active':''}" onclick="mudarPlano('${p}')">${p}</div>`).join('');
-        const corpo = document.getElementById('tabela-corpo');
-        corpo.innerHTML = '';
-        const hoje = new Date();
-        let cTotal=0, cPend=0, cPrazo=0, cOk=0;
+        
+        if (!modoLixeira) {
+            // Renderiza Planos com botão "X" para apagar
+            document.getElementById('lista-planos').innerHTML = dados.planos.map(p => `
+                <div class="nav-item ${dados.planoAtivo===p?'active':''}" style="display:flex; justify-content:space-between; align-items:center;" onclick="mudarPlano('${p}')">
+                    <span style="overflow:hidden; text-overflow:ellipsis;">${p}</span>
+                    ${dados.planos.length > 1 ? `<span onclick="event.stopPropagation(); apagarPlano('${p}')" style="color:#ff6b6b; font-size:16px; padding:0 5px;" title="Apagar Plano">×</span>` : ''}
+                </div>
+            `).join('');
+        }
 
-        Object.keys(dados.tarefas).forEach(id => {
-            const t = dados.tarefas[id];
-            if(t.plano !== dados.planoAtivo || t.eliminado) return;
-            cTotal++;
+        const corpo = document.getElementById('tabela-corpo'); corpo.innerHTML = '';
+        const hoje = new Date().setHours(0,0,0,0);
+        let cT=0, cPend=0, cPrz=0, cOk=0;
+
+        let tarefasArr = Object.keys(dados.tarefas).map(id => ({ id, ...dados.tarefas[id] }));
+        
+        if (modoLixeira) {
+            tarefasArr = tarefasArr.filter(t => t.eliminado === true);
+        } else {
+            tarefasArr = tarefasArr.filter(t => t.plano === dados.planoAtivo && !t.eliminado);
+        }
+
+        tarefasArr.sort((a, b) => {
+            if (a.urgente && !b.urgente) return -1;
+            if (!a.urgente && b.urgente) return 1;
+            return new Date(a.prazo) - new Date(b.prazo);
+        });
+
+        tarefasArr.forEach(t => {
             const est = config.estados.find(e => e.id === t.estadoId) || config.estados[0];
-            if(t.estadoId === config.estados[0].id) cPend++;
-            if(t.estadoId === config.estados[config.estados.length-1].id) cOk++;
-            const diff = (new Date(t.prazo) - hoje) / 86400000;
-            if(diff <= config.diasAviso && diff >= 0 && t.estadoId !== config.estados[config.estados.length-1].id) cPrazo++;
+            const dataT = new Date(t.prazo).setHours(0,0,0,0);
+            
+            if (!modoLixeira) {
+                cT++;
+                if(t.estadoId === config.estados[0].id) cPend++;
+                if(t.estadoId === config.estados[config.estados.length-1].id) cOk++;
+                if((dataT - hoje) / 86400000 <= config.diasAviso && dataT >= hoje && t.estadoId !== config.estados[config.estados.length-1].id) cPrz++;
 
+                if (filtroAtual === 'urgente' && !t.urgente) return;
+                if (filtroAtual !== 'todos' && filtroAtual !== 'urgente' && t.estadoId !== filtroAtual) return;
+            }
+
+            const isAtrasado = (dataT < hoje && t.estadoId !== config.estados[config.estados.length-1].id);
             const tr = document.createElement('tr');
-            tr.className = "task-row"; tr.style.borderLeftColor = est.cor; tr.style.backgroundColor = hexToRgba(est.cor, 0.06);
-            tr.oncontextmenu = (e) => { e.preventDefault(); editarCampo(id); };
-            let timer; tr.ontouchstart = () => { timer = setTimeout(() => editarCampo(id), 800); }; tr.ontouchend = () => clearTimeout(timer);
+            
+            tr.className = `task-row ${isAtrasado && !modoLixeira ? 'atrasado' : ''} ${t.urgente && !modoLixeira ? 'linha-urgente' : ''}`;
+            tr.style.borderLeftColor = est.cor;
+
+            const starOpacity = t.urgente ? '1' : '0.2';
+            const starFilter = t.urgente ? 'none' : 'grayscale(100%)';
+
+            let acoesHTML = '';
+            if (modoLixeira) {
+                // Aumentado gap/distância na lixeira
+                acoesHTML = `
+                    <button class="btn-acao" onclick="restaurar('${t.id}')" title="Restaurar" style="color:var(--primary);">♻️</button>
+                    <button class="btn-acao" onclick="eliminarDefinitivo('${t.id}')" title="Apagar para sempre" style="color:#e2445c;">❌</button>
+                `;
+            } else {
+                // GAP AUMENTADO AQUI para evitar cliques acidentais (gap: 20px)
+                acoesHTML = `
+                    <button class="btn-acao" onclick="toggleUrgente('${t.id}', ${!!t.urgente})" style="opacity:${starOpacity}; filter:${starFilter};" title="Marcar como Urgente">⭐</button>
+                    <button class="btn-acao" onclick="enviarParaLixeira('${t.id}')" style="opacity:0.4;" title="Mover para o Lixo">🗑️</button>
+                `;
+            }
 
             tr.innerHTML = `
-                <td><span class="mobile-label">Pedido:</span><strong>${t.titulo}</strong></td>
-                <td><span class="mobile-label">Resp:</span>${t.responsavel || '-'}</td>
-                <td><span class="mobile-label">Pend:</span>${t.dependente || '-'}</td>
-                <td><span class="mobile-label">Estado:</span><span class="status-badge" style="color:${est.cor}; border-color:${est.cor}">${est.nome}</span></td>
-                <td><span class="mobile-label">Prazo:</span>${new Date(t.prazo).toLocaleDateString('pt-PT')}</td>
-                <td class="actions-cell">
-                    <button onclick="enviarEmail('${id}')" style="border:none; background:none; font-size:18px; cursor:pointer">📧</button>
-                    <button onclick="eliminar('${id}')" style="border:none; background:none; font-size:18px; cursor:pointer; margin-left:10px">🗑️</button>
-                </td>`;
+                <td class="editable" data-label="Pedido:" ${!modoLixeira ? `onclick="editInline('${t.id}', 'titulo', this, 'texto')"` : ''}>${t.titulo}</td>
+                <td class="editable" data-label="Notas:" ${!modoLixeira ? `onclick="editInline('${t.id}', 'obs', this, 'texto')"` : ''}>${t.obs || '-'}</td>
+                <td class="editable" data-label="Pendente:" ${!modoLixeira ? `onclick="editInline('${t.id}', 'dependente', this, 'pendente')"` : ''}>${t.dependente || '-'}</td>
+                <td data-label="Estado:"><span class="status-badge" style="color:${est.cor}; border-color:${est.cor}" ${!modoLixeira ? `onclick="proximoEstado('${t.id}', '${t.estadoId}')"` : ''}>${est.nome}</span></td>
+                <td class="editable" data-label="Prazo:" ${!modoLixeira ? `onclick="editDate('${t.id}', this)"` : ''}>${new Date(t.prazo).toLocaleDateString('pt-PT')}</td>
+                <td data-label="Ações:" style="display: flex; gap: 20px; align-items: center;">${acoesHTML}</td>
+            `;
             corpo.appendChild(tr);
         });
-        document.getElementById('stat-total').innerText = cTotal;
-        document.getElementById('stat-pend').innerText = cPend;
-        document.getElementById('stat-prazo').innerText = cPrazo;
-        document.getElementById('stat-ok').innerText = cOk;
+
+        if (!modoLixeira) {
+            document.getElementById('stat-total').innerText = cT; document.getElementById('stat-pend').innerText = cPend;
+            document.getElementById('stat-prazo').innerText = cPrz; document.getElementById('stat-ok').innerText = cOk;
+        }
+    }
+
+    function editInline(id, campo, el, tipo = 'texto') {
+        if (modoLixeira || el.querySelector('input') || el.querySelector('select')) return;
+        const originalVal = el.innerText === '-' ? '' : el.innerText;
+
+        if (tipo === 'pendente') {
+            const opcoes = (config.pendList || "").split(',').map(i => i.trim()).filter(i => i);
+            if (originalVal && !opcoes.includes(originalVal)) opcoes.push(originalVal);
+
+            el.innerHTML = `<select class="edit-input">
+                <option value="">-</option>
+                ${opcoes.map(opt => `<option value="${opt}" ${opt === originalVal ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>`;
+            
+            const sel = el.querySelector('select');
+            sel.focus();
+            sel.onblur = () => { db.ref(`dados/tarefas/${id}`).update({ [campo]: sel.value }); render(); };
+            sel.onchange = () => { db.ref(`dados/tarefas/${id}`).update({ [campo]: sel.value }); render(); };
+        } else {
+            el.innerHTML = `<input type="text" class="edit-input" value="${originalVal}">`;
+            const input = el.querySelector('input'); input.focus();
+            input.onblur = () => { db.ref(`dados/tarefas/${id}`).update({ [campo]: input.value }); render(); };
+            input.onkeydown = e => { if(e.key === 'Enter') input.blur(); };
+        }
+    }
+
+    function editDate(id, el) {
+        if (modoLixeira || el.querySelector('input')) return;
+        el.innerHTML = `<input type="date" class="edit-input">`;
+        const input = el.querySelector('input'); input.focus();
+        input.onchange = () => { if(input.value) db.ref(`dados/tarefas/${id}`).update({ prazo: input.value }); render(); };
+    }
+
+    function proximoEstado(id, atualId) {
+        if (modoLixeira) return;
+        const idx = config.estados.findIndex(e => e.id === atualId);
+        db.ref(`dados/tarefas/${id}`).update({ estadoId: config.estados[(idx + 1) % config.estados.length].id });
+    }
+
+    function toggleUrgente(id, statusAtual) {
+        db.ref(`dados/tarefas/${id}`).update({ urgente: !statusAtual });
+    }
+
+    function enviarParaLixeira(id) {
+        db.ref(`dados/tarefas/${id}`).update({ eliminado: true });
+    }
+
+    function restaurar(id) {
+        db.ref(`dados/tarefas/${id}`).update({ eliminado: false });
+        render(); 
+    }
+
+    function eliminarDefinitivo(id) {
+        if(confirm("Tens a certeza? Esta ação não pode ser desfeita!")) {
+            db.ref(`dados/tarefas/${id}`).remove();
+        }
     }
 
     function adicionarTarefa() {
-        const titulo = document.getElementById('in-titulo').value;
-        const prazo = document.getElementById('in-prazo').value;
-        if(!titulo || !prazo) return alert("⚠️ Preencha Pedido e Prazo!");
-
+        const tit = document.getElementById('in-t').value;
+        const prz = document.getElementById('in-p').value;
+        if(!tit || !prz) return alert("Por favor, preencha o Pedido e o Prazo!");
         db.ref('dados/tarefas').push({ 
-            plano: dados.planoAtivo, titulo, prazo, 
-            responsavel: document.getElementById('in-resp').value || 'N/D',
-            dependente: document.getElementById('in-dep').value || 'N/D',
-            estadoId: config.estados[0].id, eliminado: false 
-        }).then(() => { document.getElementById('in-titulo').value = ''; })
-          .catch(err => alert("Erro ao gravar: " + err.message));
-    }
-
-    function editarCampo(id) {
-        const t = dados.tarefas[id];
-        let campo = prompt("Editar:\n1: Título\n2: Resp\n3: Pendente\n4: Estado\n5: Prazo", "1");
-        if(!campo) return;
-        let n;
-        if(campo==="1") n = prompt("Novo Título:", t.titulo);
-        else if(campo==="2") n = prompt(`Resp (${config.responsaveis}):`, t.responsavel);
-        else if(campo==="3") n = prompt(`Pend (${config.pendentesDe}):`, t.dependente);
-        else if(campo==="4") {
-            let msg = config.estados.map((e,i)=>`${i+1}: ${e.nome}`).join('\n');
-            let esc = prompt(msg, "1");
-            if(esc && config.estados[esc-1]) db.ref(`dados/tarefas/${id}`).update({ estadoId: config.estados[esc-1].id });
-            return;
-        } else if(campo==="5") n = prompt("Data (AAAA-MM-DD):", t.prazo);
-        const map = {"1":"titulo", "2":"responsavel", "3":"dependente", "5":"prazo"};
-        if(n && map[campo]) db.ref(`dados/tarefas/${id}`).update({ [map[campo]]: n });
+            plano: dados.planoAtivo, titulo: tit, obs: document.getElementById('in-o').value, 
+            dependente: document.getElementById('in-d').value, prazo: prz, 
+            estadoId: config.estados[0].id, eliminado: false, urgente: false 
+        });
+        document.getElementById('in-t').value = ''; document.getElementById('in-o').value = ''; document.getElementById('in-d').value = '';
     }
 
     function abrirSettings() {
-        document.getElementById('set-resp').value = config.responsaveis;
-        document.getElementById('set-pend').value = config.pendentesDe;
-        document.getElementById('set-dias').value = config.diasAviso;
-        renderListaEstadosSettings();
         document.getElementById('modal-settings').style.display='block';
         document.getElementById('overlay').style.display='block';
-    }
-    function renderListaEstadosSettings() {
-        document.getElementById('set-estados-list').innerHTML = config.estados.map((e, i) => `
+        document.getElementById('set-pend-list').value = config.pendList || "";
+        document.getElementById('set-theme').value = config.theme || 'light';
+        
+        document.getElementById('set-estados-list').innerHTML = config.estados.map((e,i) => `
             <div style="display:flex; gap:5px; margin-bottom:5px">
-                <input type="text" value="${e.nome}" class="st-n" style="flex:1; font-size:12px; padding:4px;">
-                <input type="color" value="${e.cor}" class="st-c" style="width:30px; border:none; background:none;">
-                <button onclick="config.estados.splice(${i},1); renderListaEstadosSettings()">✕</button>
+                <input type="text" value="${e.nome}" class="st-n" style="flex:1">
+                <input type="color" value="${e.cor}" class="st-c">
+                <button onclick="config.estados.splice(${i},1); abrirSettings()">✕</button>
             </div>`).join('');
     }
+
     function salvarSettings() {
-        const names = document.querySelectorAll('.st-n'), colors = document.querySelectorAll('.st-c');
-        const novosEstados = Array.from(names).map((input, i) => ({ id: config.estados[i]?.id || 'st'+Date.now()+i, nome: input.value, cor: colors[i].value }));
-        db.ref('config').set({ responsaveis: document.getElementById('set-resp').value, pendentesDe: document.getElementById('set-pend').value, diasAviso: parseInt(document.getElementById('set-dias').value) || 30, estados: novosEstados });
+        const ns = document.querySelectorAll('.st-n'), cs = document.querySelectorAll('.st-c');
+        const novosE = Array.from(ns).map((n, i) => ({ id: config.estados[i]?.id || 'st'+Date.now()+i, nome: n.value, cor: cs[i].value }));
+        
+        db.ref('config').update({ 
+            estados: novosE, 
+            theme: document.getElementById('set-theme').value, 
+            pendList: document.getElementById('set-pend-list').value 
+        });
         fecharModais();
     }
-    function adicionarCampoEstado() { config.estados.push({ id: 'st'+Date.now(), nome: 'Novo', cor: '#ccc' }); renderListaEstadosSettings(); }
-    function fecharModais() { document.querySelectorAll('.modal, .overlay').forEach(e => e.style.display='none'); }
-    function mudarPlano(p) { db.ref('dados').update({ planoAtivo: p }); }
-    function novoPlano() { const n = prompt("Nome:"); if(n) db.ref('dados/planos').set([...dados.planos, n]); }
-    function eliminar(id) { if(confirm("Apagar?")) db.ref(`dados/tarefas/${id}`).remove(); }
-    function hexToRgba(hex, a) { const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; }
-    function atualizarDatalists() {
-        document.getElementById('dl-resp').innerHTML = config.responsaveis.split(',').map(n => `<option value="${n.trim()}">`).join('');
-        document.getElementById('dl-pend').innerHTML = config.pendentesDe.split(',').map(n => `<option value="${n.trim()}">`).join('');
-    }
-    function enviarEmail(id) {
-        const t = dados.tarefas[id], est = config.estados.find(e => e.id === t.estadoId).nome;
-        window.location.href = `mailto:?subject=Follow-up&body=${encodeURIComponent('Tarefa: '+t.titulo+'\nEstado: '+est)}`;
-    }
+
+    function adicionarCampoEstado() { config.estados.push({ id: 'st'+Date.now(), nome: 'Novo', cor: '#ccc' }); abrirSettings(); }
+    function fecharModais() { document.getElementById('modal-settings').style.display='none'; document.getElementById('overlay').style.display='none'; }
+    function novoPlano() { const n = prompt("Nome do novo grupo:"); if(n) db.ref('dados/planos').set([...dados.planos, n]); }
+    function toggleDarkMode(val) { document.body.setAttribute('data-theme', val); }
 </script>
 </body>
 </html>
